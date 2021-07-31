@@ -2,13 +2,7 @@ import assert from "assert";
 import { promises as fs } from "fs";
 import path from "path";
 import vm, { ModuleLinker } from "vm";
-import { cjsToEsm } from "cjstoesm";
-import {
-  CompilerOptions,
-  ModuleKind,
-  ScriptTarget,
-  transpileModule,
-} from "typescript";
+import type { CompilerOptions, CustomTransformers } from "typescript";
 import { MiniflareError } from "./error";
 import { Context } from "./modules/module";
 import { ProcessedModuleRule, stringScriptPath } from "./options";
@@ -71,13 +65,8 @@ export class ModuleScriptInstance<Exports = any> implements ScriptInstance {
   }
 }
 
-const commonJsTransformer = cjsToEsm();
-const commonJsCompilerOptions: CompilerOptions = {
-  allowJs: true,
-  module: ModuleKind.ESNext,
-  sourceMap: true,
-  target: ScriptTarget.ES2018,
-};
+let commonJsTransformer: CustomTransformers | undefined = undefined;
+let commonJsCompilerOptions: CompilerOptions | undefined = undefined;
 
 export class ScriptLinker {
   readonly referencedPaths = new Set<string>();
@@ -130,6 +119,27 @@ export class ScriptLinker {
         return new vm.SourceTextModule(data.toString("utf8"), moduleOptions);
       case "CommonJS":
         // TODO: (low priority) try do this without TypeScript
+        // Dynamically import required packages, `typescript` and `cjstoesm` are
+        // pretty big
+        const {
+          transpileModule,
+          ModuleKind,
+          ScriptTarget,
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+        } = require("typescript");
+        if (commonJsTransformer === undefined) {
+          // eslint-disable-next-line @typescript-eslint/no-var-requires
+          commonJsTransformer = require("cjstoesm").cjsToEsm();
+        }
+        if (commonJsCompilerOptions === undefined) {
+          commonJsCompilerOptions = {
+            allowJs: true,
+            sourceMap: true,
+            module: ModuleKind.ESNext,
+            target: ScriptTarget.ES2018,
+          };
+        }
+
         // Convert CommonJS module to an ESModule one
         const transpiled = transpileModule(data.toString("utf8"), {
           transformers: commonJsTransformer,
