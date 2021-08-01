@@ -35,5 +35,6 @@ export {
   atob,
   btoa,
   crypto,
+  CryptoKey,
 } from "./standards";
 export { WebSocket, WebSocketPair } from "./ws";

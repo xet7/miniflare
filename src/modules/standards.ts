@@ -1,15 +1,4 @@
-import { BinaryLike, createHash } from "crypto";
-import { URL, URLSearchParams } from "url";
-import { TextDecoder, TextEncoder } from "util";
-import originalFetch, {
-  Headers,
-  Request,
-  RequestInfo,
-  RequestInit,
-  Response,
-} from "@mrbbot/node-fetch";
-import { Crypto, CryptoKey } from "@peculiar/webcrypto";
-import FormData from "formdata-node";
+import { BinaryLike, createHash, webcrypto as crypto } from "crypto";
 import {
   ByteLengthQueuingStrategy,
   CountQueuingStrategy,
@@ -24,7 +13,17 @@ import {
   WritableStream,
   WritableStreamDefaultController,
   WritableStreamDefaultWriter,
-} from "web-streams-polyfill/ponyfill/es6";
+} from "stream/web";
+import { URL, URLSearchParams } from "url";
+import { TextDecoder, TextEncoder } from "util";
+import originalFetch, {
+  Headers,
+  Request,
+  RequestInfo,
+  RequestInit,
+  Response,
+} from "@mrbbot/node-fetch";
+import FormData from "formdata-node";
 import WebSocket from "ws";
 import { Log } from "../log";
 import { Context, Module } from "./module";
@@ -52,6 +51,7 @@ export {
   WritableStream,
   WritableStreamDefaultController,
   WritableStreamDefaultWriter,
+  crypto,
 };
 
 export function atob(s: string): string {
@@ -62,7 +62,7 @@ export function btoa(s: string): string {
   return Buffer.from(s, "binary").toString("base64");
 }
 
-export const crypto = new Crypto();
+export const CryptoKey = crypto.CryptoKey;
 // Override the digest function to add support for MD5 digests which aren't
 // part of the WebCrypto standard, but are supported in Workers
 const originalDigest = crypto.subtle.digest.bind(crypto.subtle);
