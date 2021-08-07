@@ -1,6 +1,5 @@
 import { ReadableStream } from "stream/web";
 import { TextEncoder } from "util";
-import { Response } from "@mrbbot/node-fetch";
 import {
   HTMLRewriter as BaseHTMLRewriter,
   Comment,
@@ -13,6 +12,7 @@ import {
   TextChunk,
 } from "html-rewriter-wasm";
 import { Context, Module } from "./module";
+import { Response } from "./standards";
 
 // Based on https://developer.mozilla.org/en-US/docs/Web/API/TransformStream#anything-to-uint8array_stream
 const encoder = new TextEncoder();
