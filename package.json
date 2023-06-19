@@ -49,7 +49,7 @@
     "node-cron": "^2.0.3",
     "picomatch": "^2.3.0",
     "sanitize-filename": "^1.6.3",
-    "selfsigned": "^1.10.11",
+    "selfsigned": "^2.1.1",
     "semiver": "^1.1.0",
     "source-map-support": "^0.5.19",
     "tslib": "^2.3.0",
